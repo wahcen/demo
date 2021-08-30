@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -102,7 +101,7 @@ public class RList<T> implements List<T> {
     @Override
     public boolean containsAll(Collection<?> c) {
         List<Object> list = ops().range(storeKey, 0, size());
-        if (list != null){
+        if (list != null) {
             List<T> typedList = list.stream().map(item -> objectMapper.convertValue(item, objClass)).collect(Collectors.toList());
             return typedList.containsAll(c);
         }
