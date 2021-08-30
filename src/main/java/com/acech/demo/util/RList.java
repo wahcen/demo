@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -133,12 +134,16 @@ public class RList<T> implements List<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean retainAll(Collection<?> c) {
         if (c != null && !c.isEmpty()) {
+            List<T> list = new ArrayList<>((Collection<? extends T>) c);
             List<Object> range = ops().range(storeKey, 0, size());
-            c.removeAll(range.stream().map(v -> objectMapper.convertValue(v, objClass)).collect(Collectors.toList()));
-            clear();
-            ops().rightPushAll(storeKey, c);
+            if (range != null && !range.isEmpty()) {
+                list.removeAll(range.stream().map(v -> objectMapper.convertValue(v, objClass)).collect(Collectors.toList()));
+                clear();
+                ops().rightPushAll(storeKey, list);
+            }
             return true;
         }
         return false;
