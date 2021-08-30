@@ -9,8 +9,8 @@ import com.acech.demo.util.RObject;
 import com.acech.demo.util.RedisClient;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -69,22 +69,22 @@ public class RedisTest extends ApplicationTest {
         if (demoRObject.setIfAbsent(demo)) {
             demoRObject.clear();
         }
-        Assert.assertNull(demoRObject.get());
+        Assertions.assertNull(demoRObject.get());
 
         demoRObject.set(demo, 3000);
         TimeUnit.SECONDS.sleep(5);
-        Assert.assertNull(demoRObject.get());
+        Assertions.assertNull(demoRObject.get());
 
         demoRObject.set(demo);
         Demo retDemo = demoRObject.get();
-        Assert.assertEquals(demo.getId(), retDemo.getId());
-        Assert.assertEquals(demo.getName(), retDemo.getName());
+        Assertions.assertEquals(demo.getId(), retDemo.getId());
+        Assertions.assertEquals(demo.getName(), retDemo.getName());
 
         strRObject.set("This is a string object.");
-        Assert.assertEquals(strRObject.getAndSet("This is a new string object."), "This is a string object.");
-        Assert.assertEquals(strRObject.get(), "This is a new string object.");
+        Assertions.assertEquals(strRObject.getAndSet("This is a new string object."), "This is a string object.");
+        Assertions.assertEquals(strRObject.get(), "This is a new string object.");
         strRObject.ifPresent(log::info);
-        Assert.assertEquals(strRObject.orElse("Equal"), strRObject.get());
+        Assertions.assertEquals(strRObject.orElse("Equal"), strRObject.get());
     }
 
     @Test
@@ -94,16 +94,16 @@ public class RedisTest extends ApplicationTest {
         demoRMap.put("demo02", DemoFactory.randomDemo());
         demoRMap.put("demo03", DemoFactory.randomDemo());
         demoRMap.put("demo04", DemoFactory.newDemo(4, "yes"));
-        Assert.assertEquals(demoRMap.get("demo04").getName(), "yes");
-        Assert.assertEquals(demoRMap.size(), 4);
-        Assert.assertTrue(demoRMap.containsKey("demo01"));
-        Assert.assertTrue(demoRMap.containsValue(DemoFactory.newDemo(4, "yes")));
+        Assertions.assertEquals(demoRMap.get("demo04").getName(), "yes");
+        Assertions.assertEquals(demoRMap.size(), 4);
+        Assertions.assertTrue(demoRMap.containsKey("demo01"));
+        Assertions.assertTrue(demoRMap.containsValue(DemoFactory.newDemo(4, "yes")));
         demoRMap.entrySet().forEach(e -> log.info("Entry: {}", e));
         demoRMap.keySet().forEach(k -> log.info("Key: {}", k));
         demoRMap.values().forEach(v -> log.info("Value: {}", v));
         demoRMap.clear();
-        Assert.assertTrue(demoRMap.isEmpty());
-        Assert.assertNull(demoRMap.remove("demo01"));
+        Assertions.assertTrue(demoRMap.isEmpty());
+        Assertions.assertNull(demoRMap.remove("demo01"));
     }
 
     @Test
@@ -118,20 +118,20 @@ public class RedisTest extends ApplicationTest {
 
         Demo demo = demoRList.get(1);
         log.info("Removed: {} {}", demo, demoRList.remove(demo));
-        Assert.assertFalse(demoRList.contains(demo));
-        Assert.assertTrue(demoRList.contains(demoRList.get(0)));
+        Assertions.assertFalse(demoRList.contains(demo));
+        Assertions.assertTrue(demoRList.contains(demoRList.get(0)));
         log.info("Removed: {}", demoRList.remove(1));
-        Assert.assertEquals(demoRList.size(), 2);
+        Assertions.assertEquals(demoRList.size(), 2);
         if (!demoRList.isEmpty()) {
             demoRList.add(0, DemoFactory.randomDemo());
-            Assert.assertEquals(demoRList.size(), 3);
+            Assertions.assertEquals(demoRList.size(), 3);
             demoRList.addAll(2, Arrays.asList(DemoFactory.randomDemo(), DemoFactory.randomDemo()));
-            Assert.assertEquals(demoRList.size(), 5);
+            Assertions.assertEquals(demoRList.size(), 5);
             demoRList.set(0, DemoFactory.newDemo(1, "test"));
-            Assert.assertEquals(demoRList.get(0).getName(), "test");
+            Assertions.assertEquals(demoRList.get(0).getName(), "test");
             demoRList.forEach(item -> log.info("List item: {}", item));
             demoRList.clear();
-            Assert.assertTrue(demoRList.isEmpty());
+            Assertions.assertTrue(demoRList.isEmpty());
         }
     }
 }

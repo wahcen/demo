@@ -14,8 +14,8 @@ import net.sf.cglib.proxy.InvocationHandler;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
@@ -72,11 +72,7 @@ public class CgLibTest {
         // getClass是final方法，无法拦截
         System.out.println(proxy.getClass());
         // ClassCastException 拦截返回了字符串而不是数字
-        try {
-            System.out.println(proxy.hashCode());
-        } catch (ClassCastException e) {
-            // Method should reach here
-        }
+        Assertions.assertThrows(ClassCastException.class, () -> System.out.println(proxy.hashCode()));
     }
 
     /**
@@ -102,14 +98,8 @@ public class CgLibTest {
             }
         });
         CgLibDemo demo = (CgLibDemo) enhancer.create();
-        Assert.assertEquals("hello cglib", demo.test(null));
-        try {
-            // method.getDeclaringClass == Object.class，抛出异常
-            Assert.assertNotEquals("Hello cglib", demo.toString());
-        } catch (RuntimeException e) {
-            // Method should reach here
-            Assert.assertEquals("异常", e.getMessage());
-        }
+        Assertions.assertEquals("hello cglib", demo.test(null));
+        Assertions.assertThrows(RuntimeException.class, demo::toString);
     }
 
     /**
@@ -140,9 +130,9 @@ public class CgLibTest {
         enhancer.setCallbackFilter(callbackHelper);
         CgLibDemo demo = (CgLibDemo) enhancer.create();
         // 方法被拦截
-        Assert.assertEquals("Hello cglib", demo.test(null));
+        Assertions.assertEquals("Hello cglib", demo.test(null));
         // toString()的调用class是Object，放行
-        Assert.assertNotEquals("Hello cglib", demo.toString());
+        Assertions.assertNotEquals("Hello cglib", demo.toString());
         System.out.println(demo.hashCode());
     }
 
@@ -158,15 +148,11 @@ public class CgLibTest {
         CgLibBeanDemo demo = new CgLibBeanDemo();
         demo.setValue("Hello world");
         CgLibBeanDemo immutableDemo = (CgLibBeanDemo) ImmutableBean.create(demo);
-        Assert.assertEquals("Hello world", immutableDemo.getValue());
+        Assertions.assertEquals("Hello world", immutableDemo.getValue());
         // 可以通过原始对象修改
         demo.setValue("Hello world, again");
-        Assert.assertEquals("Hello world, again", immutableDemo.getValue());
-        try {
-            immutableDemo.setValue("Changed Value");
-        } catch (IllegalStateException e) {
-            // Method should reach here
-        }
+        Assertions.assertEquals("Hello world, again", immutableDemo.getValue());
+        Assertions.assertThrows(IllegalStateException.class, () -> immutableDemo.setValue("Changed Value"));
     }
 
     /**
@@ -183,7 +169,7 @@ public class CgLibTest {
         setter.invoke(rawBean, 12345);
         // 获取getter并输出
         Method getter = rawBean.getClass().getMethod("getUserId");
-        Assert.assertEquals(12345, getter.invoke(rawBean));
+        Assertions.assertEquals(12345, getter.invoke(rawBean));
     }
 
     /**
@@ -220,7 +206,7 @@ public class CgLibTest {
                 return o;
             }
         });
-        Assert.assertEquals("Hello cglib", copiedDemo.getValue());
+        Assertions.assertEquals("Hello cglib", copiedDemo.getValue());
     }
 
     /**
@@ -237,10 +223,10 @@ public class CgLibTest {
         demo.setValue("Hello bulkBean");
         // 等价于bulkBean.getPropertyValues(demo, [...getters])
         Object[] propertyValues = bulkBean.getPropertyValues(demo);
-        Assert.assertEquals(1, propertyValues.length);
-        Assert.assertEquals("Hello bulkBean", propertyValues[0]);
+        Assertions.assertEquals(1, propertyValues.length);
+        Assertions.assertEquals("Hello bulkBean", propertyValues[0]);
         bulkBean.setPropertyValues(demo, new Object[] {"Hello cglib"});
-        Assert.assertEquals("Hello cglib", demo.getValue());
+        Assertions.assertEquals("Hello cglib", demo.getValue());
     }
 
     /**
@@ -267,12 +253,12 @@ public class CgLibTest {
         passwordSetter.invoke(bean, "12345");
         // 获取bean的BeanMap
         BeanMap map = BeanMap.create(bean);
-        Assert.assertEquals("admin", map.get("username"));
+        Assertions.assertEquals("admin", map.get("username"));
         // 修改bean的属性值
         map.put("username", "administrator");
         map.put("value", "changedDemoValue");
-        Assert.assertEquals("administrator", bean.getClass().getMethod("getUsername").invoke(bean));
-        Assert.assertEquals("changedDemoValue", bean.getClass().getMethod("getValue").invoke(bean));
-        Assert.assertEquals("12345", map.get("password"));
+        Assertions.assertEquals("administrator", bean.getClass().getMethod("getUsername").invoke(bean));
+        Assertions.assertEquals("changedDemoValue", bean.getClass().getMethod("getValue").invoke(bean));
+        Assertions.assertEquals("12345", map.get("password"));
     }
 }
